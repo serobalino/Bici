@@ -10,6 +10,7 @@ import {
     TextInput,
     ScrollView,
     Button,
+    Platform
 } from 'react-native';
 
 import axios from 'axios';
@@ -95,18 +96,33 @@ export default class usuarios extends Component {
     render() {
         const pUsuarios = this.state.usuarios.map((elem) => {
             const textDecorationLine = elem.ESTADO_USO==='SI' ? 'line-through' : 'none';
-            return (
-                <TouchableNativeFeedback
-                    key={elem.ID_USER}
-                    onPress={() => this.cambiarUsuarios(elem)}>
-                    <View style={styles.btnWrapper}>
-                        <Text style={[styles.todoText, { textDecorationLine }]}>{elem.NOMBRE} {elem.APELLIDO}</Text>
-                        <TouchableOpacity onPress={() => this.eliminarUsuario(elem)}>
-                            <Icon name="md-close" size={20} color="red" />
-                        </TouchableOpacity>
-                    </View>
-                </TouchableNativeFeedback>
-            );
+            if (Platform.OS === 'android') {
+                return (
+                    <TouchableNativeFeedback
+                        key={elem.ID_USER}
+                        onPress={() => this.cambiarUsuarios(elem)}>
+                        <View style={styles.btnWrapper}>
+                            <Text style={[styles.todoText, { textDecorationLine }]}>{elem.NOMBRE} {elem.APELLIDO}</Text>
+                            <TouchableOpacity onPress={() => this.eliminarUsuario(elem)}>
+                                <Icon name="md-close" size={20} color="red" />
+                            </TouchableOpacity>
+                        </View>
+                    </TouchableNativeFeedback>
+                );
+            } else {
+                return (
+                    <TouchableHighlight
+                        key={elem.ID_USER}
+                        onPress={() => this.cambiarUsuarios(elem)}>
+                        <View style={styles.btnWrapper}>
+                            <Text style={[styles.todoText, { textDecorationLine }]}>{elem.NOMBRE} {elem.APELLIDO}</Text>
+                            <TouchableOpacity onPress={() => this.eliminarUsuario(elem)}>
+                                <Icon name="md-close" size={20} color="red" />
+                            </TouchableOpacity>
+                        </View>
+                    </TouchableHighlight>
+                );
+            }
         });
 
         return (
