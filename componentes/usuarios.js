@@ -66,6 +66,7 @@ export default class usuarios extends Component {
             })
             .catch((error) => {
                 console.log(error, error.response);
+                Alert.alert('Error',error);
             });
     }
     cambiarUsuarios(usuario){

@@ -3,13 +3,16 @@
     "name": "Bici App",
     "icon": "./icono.png",
     "version": "1.0.0",
-    "slug": "Bici",
+    "slug": "Programacion",
     "sdkVersion": "27.0.0",
     "ios": {
       "bundleIdentifier": "www.puce.edu.ec"
     },
     "android": {
-      "package": "www.puce.edu.ec"
+      "package": "www.puce.edu.ec",
+      "config": {
+        "googleMaps": { "apiKey": "AIzaSyCFBj4spYQ9vQjJ0du-92WGyNmr7fLqaQI" }
+      }
     }
   }
 }
