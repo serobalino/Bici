@@ -25,7 +25,7 @@ export default class lugares extends Component {
         this.state = {
             usuarios: [],
             lugares:[],
-            usuario:1,
+            usuario:-1,
             x:{latitude:-0.2083443,longitude:-78.4927813}
         };
         this.nuevoLugar = this.nuevoLugar.bind(this);
@@ -35,20 +35,24 @@ export default class lugares extends Component {
 
     nuevoLugar() {
         dismissKeyboard();
-        const lId=this.state.lugares.length+1;
-        axios.post(APIUrl + '/location',{
-            ID_USER: this.state.usuario,
-            LATITUD:this.state.x.latitude,
-            LONGITUD:this.state.x.longitude,
-            ID:lId
-        }).then((response) => {
-            this.consultarLugares();
-            let nombre = this.state.usuarios.find(x => x.ID_USER === this.state.usuario).NOMBRE;
-            Alert.alert('Éxito','Se ha agregado la ubicación de '+nombre);
-        }).catch((error) => {
-            console.log(error);
-            Alert.alert('Error',error);
-        });
+        if(this.state.usuario>=0){
+            const lId=this.state.lugares.length+1;
+            axios.post(APIUrl + '/location',{
+                ID_USER: this.state.usuario,
+                LATITUD:this.state.x.latitude,
+                LONGITUD:this.state.x.longitude,
+                ID:lId
+            }).then((response) => {
+                this.consultarLugares();
+                let nombre = this.state.usuarios.find(x => x.ID_USER === this.state.usuario).NOMBRE;
+                Alert.alert('Éxito','Se ha agregado la ubicación de '+nombre);
+            }).catch((error) => {
+                console.log(error);
+                Alert.alert('Error',error);
+            });
+        }else{
+            Alert.alert('Error','Elija un usuario válido');
+        }
     }
     consultarUsuarios(){
         axios.get(APIUrl + '/user')
@@ -116,18 +120,19 @@ export default class lugares extends Component {
                             onValueChange={(itemValue, itemIndex) => this.setState({usuario: itemValue})}
                             itemStyle={{height: 50}}
                         >
+                            <Picker.Item key={'unselectable'} label="Elija un usuario" value={-1} />
                             {pUsuarios}
                         </Picker>
                     <ScrollView>
                         <MapView
-
-
                             initialRegion={{
                                 latitude:this.state.x.latitude,
                                 longitude:this.state.x.longitude,
                                 latitudeDelta:0.1,
                                 longitudeDelta:0.1
                             }}
+
+                            onPress={(e) => this.setState({ x: e.nativeEvent.coordinate })}
 
                             style={{height: 500,width:"100%"}}>
 
