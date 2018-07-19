@@ -1,4 +1,4 @@
-Bici App
+<p align="center">Bici App</p>
 
 PUCE
 
