@@ -10,7 +10,8 @@ import {
     TextInput,
     ScrollView,
     Button,
-    Platform
+    Platform,
+    Alert
 } from 'react-native';
 
 import axios from 'axios';
@@ -37,19 +38,25 @@ export default class usuarios extends Component {
 
     nuevoUsuario() {
         dismissKeyboard();
-        const uId=this.state.usuarios.length+1;
-        axios.post(APIUrl + '/user',{
-            NOMBRE: this.state.nombre,
-            APELLIDO:this.state.apellido,
-            TELEFONO:this.state.telefono,
-            ESTADO_USO:this.state.uso,
-            ID_USER: uId,
-        }).then((response) => {
-            this.setState({ nombre:'',apellido:'',telefono:''});
-            this.consultarUsuarios();
-        }).catch((error) => {
-            console.log(error);
-        });
+        if(this.state.nombre!=='' && this.state.apellido!=='' && this.state.telefono!==''){
+            const uId=this.state.usuarios.length+1;
+            axios.post(APIUrl + '/user',{
+                NOMBRE: this.state.nombre,
+                APELLIDO:this.state.apellido,
+                TELEFONO:this.state.telefono,
+                ESTADO_USO:this.state.uso,
+                ID_USER: uId,
+            }).then((response) => {
+                this.consultarUsuarios();
+                Alert.alert('Éxito','Se ha agregado a '+this.state.nombre);
+                this.setState({ nombre:'',apellido:'',telefono:''});
+            }).catch((error) => {
+                console.log(error);
+                Alert.alert('Error',error);
+            });
+        }else{
+            Alert.alert('Error','Complete el formulario para agregar un nuevo usuario');
+        }
     }
 
     consultarUsuarios(){
@@ -77,15 +84,18 @@ export default class usuarios extends Component {
             this.consultarUsuarios();
         }).catch((error) => {
             console.log(error, error.response);
+            Alert.alert('Error',error);
         });
     }
     eliminarUsuario(usuario){
         axios.delete(APIUrl + '/user/' + usuario.ID_USER)
             .then((response) => {
                 this.consultarUsuarios();
+                Alert.alert('Éxito','Se ha eliminado '+usuario.NOMBRE);
             })
             .catch((error) => {
                 console.log(error);
+                Alert.alert('Error',error);
             });
     }
 
@@ -96,7 +106,7 @@ export default class usuarios extends Component {
 
     render() {
         const pUsuarios = this.state.usuarios.map((elem) => {
-            const textDecorationLine = elem.ESTADO_USO==='SI' ? 'line-through' : 'none';
+            const textDecorationLine = elem.ESTADO_USO==='SI' ? 'underline' : 'none';
             if (Platform.OS === 'android') {
                 return (
                     <TouchableNativeFeedback
@@ -167,13 +177,15 @@ export default class usuarios extends Component {
                     </View>
                     <ScrollView>
                         {pUsuarios}
+                    </ScrollView>
+                    <View >
                         <Button
                             onPress={this.props.handler}
                             title="Lugares"
                             color="#ff0000"
-                            style={{height: 60,paddingTop:10}}
+                            style={{height: 60}}
                         />
-                    </ScrollView>
+                    </View>
                 </View>
             </View>
         )

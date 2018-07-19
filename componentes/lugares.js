@@ -4,10 +4,7 @@ import {
     Text,
     View,
     AppRegistry,
-    TouchableOpacity,
-    TouchableHighlight,
-    TouchableNativeFeedback,
-    TextInput,
+    Alert,
     Button,
     ScrollView,
     Picker
@@ -45,10 +42,12 @@ export default class lugares extends Component {
             LONGITUD:this.state.x.longitude,
             ID:lId
         }).then((response) => {
-            //this.setState({ usuario:null,lng:'',lat:''});
             this.consultarLugares();
+            let nombre = this.state.usuarios.find(x => x.ID_USER === this.state.usuario).NOMBRE;
+            Alert.alert('Éxito','Se ha agregado la ubicación de '+nombre);
         }).catch((error) => {
             console.log(error);
+            Alert.alert('Error',error);
         });
     }
     consultarUsuarios(){
@@ -121,18 +120,13 @@ export default class lugares extends Component {
                         </Picker>
                     <ScrollView>
                         <MapView
-                            region={{
-                                latitude:this.state.x.latitude,
-                                longitude:this.state.x.longitude,
-                                latitudeDelta:.5,
-                                longitudeDelta:.5
-                            }}
+
 
                             initialRegion={{
                                 latitude:this.state.x.latitude,
                                 longitude:this.state.x.longitude,
-                                latitudeDelta:0.5,
-                                longitudeDelta:0.5
+                                latitudeDelta:0.1,
+                                longitudeDelta:0.1
                             }}
 
                             style={{height: 500,width:"100%"}}>
