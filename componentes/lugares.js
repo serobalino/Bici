@@ -33,6 +33,7 @@ export default class lugares extends Component {
         };
         this.nuevoLugar = this.nuevoLugar.bind(this);
         this.consultarLugares = this.consultarLugares.bind(this);
+        this.poseActual = this.poseActual.bind(this);
     }
 
     nuevoLugar() {
@@ -70,8 +71,26 @@ export default class lugares extends Component {
             });
     }
 
+    poseActual(){
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                this.setState({
+                    x:{
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude
+                    }
+                });
+            },
+            (error) => this.setState({ x:{
+                latitude:-0.2083443,longitude:-78.4927813
+            }}),
+            { enableHighAccuracy: false, timeout: 200000, maximumAge: 1000 }
+        );
+    }
+
 
     componentDidMount() {
+        this.poseActual();
         this.consultarUsuarios();
         this.consultarLugares();
     }
@@ -92,47 +111,66 @@ export default class lugares extends Component {
                     <View style={styles.right} />
                 </View>
                 <View style={styles.content}>
-                    <ScrollView>
-                        <View style={styles.content}>
-                            <View style={styles.inputContainer}>
-                                <View style={styles.inputGroup}>
-                                    <Text style={{ height: 50, width: 50, paddingTop:18 }}>Usuario</Text>
-                                    <Picker
-                                        selectedValue={this.state.usuario}
-                                        style={{ height: 50, width: 350 }}
-                                        onValueChange={(itemValue, itemIndex) => this.setState({usuario: itemValue})}>
-                                    {pUsuarios}
-                                    </Picker>
-                                </View>
-                            </View>
-                        </View>
-                        <MapView
-                            initialRegion={{
-                                latitude: -0.2083443,
-                                longitude: -78.4927813,
-                                latitudeDelta:0.001,
-                                longitudeDelta:0.001
-                            }}
-                            style={{height: 500,width:400}}
+                        <Picker
+                            selectedValue={this.state.usuario}
+                            style={{ height:50, width:"100%", paddingTop:-20}}
+                            onValueChange={(itemValue, itemIndex) => this.setState({usuario: itemValue})}
+                            itemStyle={{height: 50}}
                         >
+                            {pUsuarios}
+                        </Picker>
+                    <ScrollView>
+                        <MapView
+                            region={{
+                                latitude:this.state.x.latitude,
+                                longitude:this.state.x.longitude,
+                                latitudeDelta:.5,
+                                longitudeDelta:.5
+                            }}
+
+                            initialRegion={{
+                                latitude:this.state.x.latitude,
+                                longitude:this.state.x.longitude,
+                                latitudeDelta:0.5,
+                                longitudeDelta:0.5
+                            }}
+
+                            style={{height: 500,width:"100%"}}>
+
                             <Marker draggable
                                     coordinate={this.state.x}
                                     onDragEnd={(e) => this.setState({ x: e.nativeEvent.coordinate })}
                             />
                         </MapView>
+                    </ScrollView>
+                    <View >
                         <Button
                             onPress={this.nuevoLugar}
                             title="Agregar Lugar"
                             color="#1aa8b5"
                             style={{height: 60}}
+                            icon={
+                                <Icon
+                                    name="md-add"
+                                    size={20}
+                                    color="#000"
+                                />
+                            }
                         />
                         <Button
                             onPress={this.props.handler}
                             title="Usuarios"
                             color="#ff0000"
-                            style={{height: 60,paddingTop:10}}
+                            style={{height: 60}}
+                            icon={
+                                <Icon
+                                    name='ios-people'
+                                    size={20}
+                                    color="#000"
+                                />
+                            }
                         />
-                    </ScrollView>
+                    </View>
                 </View>
             </View>
         )

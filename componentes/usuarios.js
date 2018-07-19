@@ -42,7 +42,8 @@ export default class usuarios extends Component {
             NOMBRE: this.state.nombre,
             APELLIDO:this.state.apellido,
             TELEFONO:this.state.telefono,
-            ESTADO_USO:this.state.uso
+            ESTADO_USO:this.state.uso,
+            ID_USER: uId,
         }).then((response) => {
             this.setState({ nombre:'',apellido:'',telefono:''});
             this.consultarUsuarios();
