@@ -3,10 +3,7 @@ import {
     StyleSheet,
     Text,
     View,
-    Alert,
-    Button,
-    ScrollView,
-    TouchableOpacity,
+    Alert
 } from 'react-native';
 
 import axios from 'axios';
@@ -47,7 +44,7 @@ export default class lugares extends Component {
             LATITUD:this.state.x.latitude,
             LONGITUD:this.state.x.longitude,
         }).then((response) => {
-            //this.consultarLugares();
+            this.consultarLugares();
         }).catch((error) => {
             console.log(error);
             Alert.alert('Error',error);
@@ -82,7 +79,6 @@ export default class lugares extends Component {
         axios.get(APIUrl + '/user/'+this.props.usuario)
             .then((response) => {
                 this.setState({ usuario: response.data });
-                //setInterval(this.poseActual(),5000);
             })
             .catch((error) => {
                 console.log(error, error.response);
@@ -134,7 +130,7 @@ export default class lugares extends Component {
         let boton   =   null;
         if(this.state.usuario.ESTADO_USO==="SI")
             boton   =   <ActionButton.Item buttonColor='#ff0000' title="Desactivar Tracking" onPress={this.cambiarUsuarios}>
-                            <Icon name="md-create" style={styles.actionButtonIcon} />
+                            <Icon name="md-close-circle" style={styles.actionButtonIcon} />
                         </ActionButton.Item>
         else
             boton   =   <ActionButton.Item buttonColor='#00ff00' title="Activar Tracking" onPress={this.cambiarUsuarios}>
