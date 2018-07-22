@@ -23,13 +23,14 @@ export default class lugares extends Component {
         this.state = {
             usuario: [],
             lugares:[],
-            x:{latitude:-0.2083443,longitude:-78.4927813}
+            x:this.props.pose
         };
         this.nuevoLugar = this.nuevoLugar.bind(this);
         this.consultarLugares = this.consultarLugares.bind(this);
         this.poseActual = this.poseActual.bind(this);
         this.logOut = this.logOut.bind(this);
         this.consultarUsuarios = this.consultarUsuarios.bind(this);
+        this.cambiarUsuarios = this.cambiarUsuarios.bind(this);
     }
 
 
@@ -39,17 +40,18 @@ export default class lugares extends Component {
     }
 
     nuevoLugar() {
-        axios.post(APIUrl + '/location',{
-            ID_USER: this.props.usuario,
-            LATITUD:this.state.x.latitude,
-            LONGITUD:this.state.x.longitude,
-        }).then((response) => {
-            this.consultarLugares();
-        }).catch((error) => {
-            console.log(error);
-            Alert.alert('Error',error);
-        });
-
+        if(this.state.x.latitude && this.state.x.longitude){
+            axios.post(APIUrl + '/location',{
+                ID_USER: this.props.usuario,
+                LATITUD:this.state.x.latitude,
+                LONGITUD:this.state.x.longitude,
+            }).then((response) => {
+                this.consultarLugares();
+            }).catch((error) => {
+                console.log(error);
+                Alert.alert('Error',error);
+            });
+        }
     }
 
     cambiarUsuarios(){
@@ -162,6 +164,7 @@ export default class lugares extends Component {
 
 
                             style={{height: "100%",width:"100%"}}>
+
                             {lista}
                             <Marker coordinate={this.state.x} pinColor="green"/>
                         </MapView>
