@@ -63,6 +63,7 @@ export default class Login extends Component {
                     placeholder={'CONTRASEÑA'}
                     secureTextEntry={true}
                     style={styles.input}
+                    onSubmitEditing={this.login}
                 />
                 <View style={{width:"80%",padding:20,justifyContent:'space-between'}}>
                 <Button

@@ -25,7 +25,7 @@ export default class Registro  extends Component {
     }
     registro(){
         dismissKeyboard();
-        if(this.state.nombre!=='' && this.state.apellido!=='' && this.state.telefono!=='' && this.state.contrasena){
+        if(this.state.nombre!=='' && this.state.apellido!=='' && this.state.telefono!=='' && this.state.contrasena!==''){
             axios.post(APIUrl + '/user',{
                 NOMBRE: this.state.nombre,
                 APELLIDO:this.state.apellido,
@@ -77,6 +77,7 @@ export default class Registro  extends Component {
                     placeholder={'CONTRASEÑA'}
                     secureTextEntry={true}
                     style={styles.input}
+                    onSubmitEditing={this.registro}
                 />
                 <View style={{width:"80%",padding:20,justifyContent:'space-between'}}>
                     <Button
