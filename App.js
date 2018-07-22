@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import Usuarios from './componentes/usuarios';
 import Lugares from './componentes/lugares';
+import Login from './componentes/login';
+import Registro from './componentes/registro';
 
 //const dismissKeyboard = require('dismissKeyboard');
 
@@ -10,30 +12,35 @@ export default class App extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            ventana:1
+            ventana:1,
+            usuario:null,
         };
-        this.handler = this.handler.bind(this);
-        this.handler2 = this.handler2.bind(this);
+        this.cambiarVista = this.cambiarVista.bind(this);
+        this.setUsuario = this.setUsuario.bind(this);
     }
 
-    handler(e) {
-        e.preventDefault()
+    setUsuario(usuario){
         this.setState({
-            ventana:1
+            usuario:usuario
         });
     }
-    handler2(e) {
-        e.preventDefault()
+
+    cambiarVista(ventana){
         this.setState({
-            ventana:2
+            ventana:ventana
         });
     }
+
 
     render() {
-        if(this.state.ventana===1)
-            return (<Usuarios handler={this.handler2} />);
+        if(this.state.usuario===null && this.state.ventana===1)
+            return (<Login cambiarVista={this.cambiarVista} setUsuario={this.setUsuario}/>);
         else
-            return (<Lugares handler={this.handler}/>)
+            if(this.state.usuario!==null && this.state.ventana===3)
+                return (<Lugares cambiarVista={this.cambiarVista} usuario={this.state.usuario} setUsuario={this.setUsuario}/>);
+            else
+                return (<Registro cambiarVista={this.cambiarVista}/>);
+
     }
 
 }

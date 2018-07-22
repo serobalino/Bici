@@ -3,16 +3,17 @@ import {
     StyleSheet,
     Text,
     View,
-    AppRegistry,
     Alert,
     Button,
     ScrollView,
-    Picker
+    TouchableOpacity,
 } from 'react-native';
 
 import axios from 'axios';
 import Icon from 'react-native-vector-icons/Ionicons';
+import ActionButton from 'react-native-action-button';
 import MapView,{Marker} from 'react-native-maps';
+
 
 const dismissKeyboard = require('dismissKeyboard');
 const APIUrl = 'http://www.puceing.edu.ec:15000/proyectobici/api';
@@ -23,41 +24,65 @@ export default class lugares extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            usuarios: [],
+            usuario: [],
             lugares:[],
-            usuario:-1,
             x:{latitude:-0.2083443,longitude:-78.4927813}
         };
         this.nuevoLugar = this.nuevoLugar.bind(this);
         this.consultarLugares = this.consultarLugares.bind(this);
         this.poseActual = this.poseActual.bind(this);
+        this.logOut = this.logOut.bind(this);
+        this.consultarUsuarios = this.consultarUsuarios.bind(this);
+    }
+
+
+    logOut(){
+        this.props.cambiarVista(1);
+        this.props.setUsuario(null);
     }
 
     nuevoLugar() {
-        dismissKeyboard();
-        if(this.state.usuario>=0){
-            const lId=this.state.lugares.length+1;
-            axios.post(APIUrl + '/location',{
-                ID_USER: this.state.usuario,
-                LATITUD:this.state.x.latitude,
-                LONGITUD:this.state.x.longitude,
-                ID:lId
-            }).then((response) => {
-                this.consultarLugares();
-                let nombre = this.state.usuarios.find(x => x.ID_USER === this.state.usuario).NOMBRE;
-                Alert.alert('Éxito','Se ha agregado la ubicación de '+nombre);
-            }).catch((error) => {
-                console.log(error);
-                Alert.alert('Error',error);
-            });
-        }else{
-            Alert.alert('Error','Elija un usuario válido');
-        }
+        axios.post(APIUrl + '/location',{
+            ID_USER: this.props.usuario,
+            LATITUD:this.state.x.latitude,
+            LONGITUD:this.state.x.longitude,
+        }).then((response) => {
+            //this.consultarLugares();
+        }).catch((error) => {
+            console.log(error);
+            Alert.alert('Error',error);
+        });
+
     }
+
+    cambiarUsuarios(){
+        let usuario = this.state.usuario;
+
+        let estado='';
+        if(usuario.ESTADO_USO==='SI')
+            estado='NO';
+        else
+            estado='SI';
+        axios.put(APIUrl + '/user',{
+            ID_USER: usuario.ID_USER,
+            ESTADO_USO:estado,
+            NOMBRE: usuario.NOMBRE,
+            APELLIDO:usuario.APELLIDO,
+            PASSWORD:usuario.PASSWORD,
+            TELEFONO:usuario.TELEFONO,
+        }).then((response) => {
+            this.consultarUsuarios();
+        }).catch((error) => {
+            console.log(error, error.response);
+            Alert.alert('Error',error);
+        });
+    }
+
     consultarUsuarios(){
-        axios.get(APIUrl + '/user')
+        axios.get(APIUrl + '/user/'+this.props.usuario)
             .then((response) => {
-                this.setState({ usuarios: response.data });
+                this.setState({ usuario: response.data });
+                //setInterval(this.poseActual(),5000);
             })
             .catch((error) => {
                 console.log(error, error.response);
@@ -65,7 +90,7 @@ export default class lugares extends Component {
     }
 
     consultarLugares(){
-        axios.get(APIUrl + '/location')
+        axios.get(APIUrl + '/location/'+this.props.usuario)
             .then((response) => {
                 this.setState({ lugares: response.data });
             })
@@ -89,19 +114,37 @@ export default class lugares extends Component {
             }}),
             { enableHighAccuracy: false, timeout: 200000, maximumAge: 1000 }
         );
+        if(this.state.usuario.ESTADO_USO==="SI"){
+            this.nuevoLugar();
+        }
     }
 
-
     componentDidMount() {
-        this.poseActual();
         this.consultarUsuarios();
-        this.consultarLugares();
+        this._interval = setInterval(() => {
+            this.poseActual()
+        }, 30000);
+        //30000 mitad de un minuto
+    }
+    componentWillUnmount() {
+        clearInterval(this._interval);
     }
 
     render() {
-        const pUsuarios = this.state.usuarios.map((elem) => {
+        let boton   =   null;
+        if(this.state.usuario.ESTADO_USO==="SI")
+            boton   =   <ActionButton.Item buttonColor='#ff0000' title="Desactivar Tracking" onPress={this.cambiarUsuarios}>
+                            <Icon name="md-create" style={styles.actionButtonIcon} />
+                        </ActionButton.Item>
+        else
+            boton   =   <ActionButton.Item buttonColor='#00ff00' title="Activar Tracking" onPress={this.cambiarUsuarios}>
+                            <Icon name="md-done-all" style={styles.actionButtonIcon} />
+                        </ActionButton.Item>;
+        const lista = this.state.lugares.map((elem) => {
             return (
-                <Picker.Item key={elem.ID_USER} label={elem.NOMBRE + ' ' + elem.APELLIDO} value={elem.ID_USER} />
+                <Marker
+                    key={elem.ID}
+                    coordinate={{latitude:elem.LATITUD,longitude:elem.LONGITUD}}/>
             );
         });
 
@@ -111,19 +154,8 @@ export default class lugares extends Component {
                     <View style={styles.center}>
                         <Text style={styles.pageTitle}>Lugares</Text>
                     </View>
-                    <View style={styles.right} />
                 </View>
                 <View style={styles.content}>
-                        <Picker
-                            selectedValue={this.state.usuario}
-                            style={{ height:50, width:"100%", paddingTop:-20}}
-                            onValueChange={(itemValue, itemIndex) => this.setState({usuario: itemValue})}
-                            itemStyle={{height: 50}}
-                        >
-                            <Picker.Item key={'unselectable'} label="Elija un usuario" value={-1} />
-                            {pUsuarios}
-                        </Picker>
-                    <ScrollView>
                         <MapView
                             initialRegion={{
                                 latitude:this.state.x.latitude,
@@ -132,44 +164,17 @@ export default class lugares extends Component {
                                 longitudeDelta:0.1
                             }}
 
-                            onPress={(e) => this.setState({ x: e.nativeEvent.coordinate })}
 
-                            style={{height: 500,width:"100%"}}>
-
-                            <Marker draggable
-                                    coordinate={this.state.x}
-                                    onDragEnd={(e) => this.setState({ x: e.nativeEvent.coordinate })}
-                            />
+                            style={{height: "100%",width:"100%"}}>
+                            {lista}
+                            <Marker coordinate={this.state.x} pinColor="green"/>
                         </MapView>
-                    </ScrollView>
-                    <View >
-                        <Button
-                            onPress={this.nuevoLugar}
-                            title="Agregar Lugar"
-                            color="#1aa8b5"
-                            style={{height: 60}}
-                            icon={
-                                <Icon
-                                    name="md-add"
-                                    size={20}
-                                    color="#000"
-                                />
-                            }
-                        />
-                        <Button
-                            onPress={this.props.handler}
-                            title="Usuarios"
-                            color="#ff0000"
-                            style={{height: 60}}
-                            icon={
-                                <Icon
-                                    name='ios-people'
-                                    size={20}
-                                    color="#000"
-                                />
-                            }
-                        />
-                    </View>
+                        <ActionButton buttonColor="#1aa8b5" >
+                            {boton}
+                            <ActionButton.Item buttonColor='#4C544F' title="Cerrar sesión" onPress={this.logOut}>
+                                <Icon name="md-log-out" style={styles.actionButtonIcon} />
+                            </ActionButton.Item>
+                        </ActionButton>
                 </View>
             </View>
         )
@@ -218,6 +223,11 @@ const styles = StyleSheet.create({
         paddingRight: 10,
         backgroundColor: '#ddd',
     },
+    actionButtonIcon: {
+        fontSize: 20,
+        height: 22,
+        color: 'white',
+    },
     inputGroup: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -241,6 +251,6 @@ const styles = StyleSheet.create({
         borderBottomColor: '#ddd',
     },
     todoText: {
-        flex: 1,
+        flex: 1
     }
 });
